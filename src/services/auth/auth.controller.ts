@@ -1,11 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
-import { BaseController } from '../../common/base.controller';
-import { LoggerService } from '../../helpers/logger/logger.service';
-import { HttpMethods } from '../../types/HttpMethods';
+import 'reflect-metadata';
+import { inject, injectable } from 'inversify';
 
-export class AuthController extends BaseController {
-	constructor(logger: LoggerService) {
-		super(logger);
+import { BaseController } from '../../common/base.controller';
+import { HttpMethods } from '../../types/HttpMethods';
+import { HttpError } from '../../errors/http-error.class';
+import { NAMES } from '../../types/names';
+import { ILogger } from '../../helpers/logger/logger.interface';
+import { IAuthController } from './auth.controller.interface';
+
+@injectable()
+export class AuthController extends BaseController implements IAuthController {
+	constructor(@inject(NAMES.ILogger) private loggerService: ILogger) {
+		super(loggerService);
+
 		this.bindRoutes([
 			{ path: '/register', method: HttpMethods.POST, func: this.register },
 			{ path: '/login', method: HttpMethods.POST, func: this.login },
@@ -13,8 +21,8 @@ export class AuthController extends BaseController {
 	}
 
 	login(req: Request, res: Response, next: NextFunction): void {
-		this.sendOk(res, 'OK login');
-		next();
+		next(new HttpError(401, 'Non authorized', 'login'));
+		// this.sendOk(res, 'OK login');
 	}
 
 	register(req: Request, res: Response, next: NextFunction): void {
