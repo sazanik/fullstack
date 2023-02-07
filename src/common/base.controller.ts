@@ -9,7 +9,7 @@ import { ILogger } from '../helpers/logger/logger.interface';
 export abstract class BaseController {
 	private readonly _router: Router;
 
-	constructor(private logger: ILogger) {
+	constructor(protected logger: ILogger) {
 		this._router = Router();
 	}
 

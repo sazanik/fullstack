@@ -1,5 +1,6 @@
 import express, { Express } from 'express';
 import { inject, injectable } from 'inversify';
+import { json } from 'body-parser';
 import { Server } from 'http';
 import 'reflect-metadata';
 
@@ -23,6 +24,10 @@ export class App {
 		this.port = 8000;
 	}
 
+	useMiddleware(): void {
+		this.app.use(json());
+	}
+
 	useRoutes(): void {
 		this.app.use('/', this.authController.router);
 	}
@@ -34,6 +39,7 @@ export class App {
 	public async init(): Promise<void> {
 		this.server = this.app.listen(this.port);
 
+		this.useMiddleware();
 		this.useRoutes();
 		this.useExceptionFilter();
 		this.logger.info('Server started on 8000 port');
