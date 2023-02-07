@@ -4,10 +4,9 @@ import { json } from 'body-parser';
 import { Server } from 'http';
 import 'reflect-metadata';
 
-import { AuthController } from './services/auth/auth.controller';
-import { ExceptionFilter } from './errors/exception.filter';
-import { ILogger } from './helpers/logger/logger.interface';
-import { NAMES } from './types/names';
+import { NAMES } from '@constants/index';
+import { AuthController, ConfigService, LoggerService } from '@services/index';
+import { ExceptionFilter } from '@errors/index';
 
 @injectable()
 export class App {
@@ -16,9 +15,10 @@ export class App {
 	port: number;
 
 	constructor(
-		@inject(NAMES.ILogger) private logger: ILogger,
+		@inject(NAMES.LoggerService) private logger: LoggerService,
 		@inject(NAMES.ExceptionFilter) private exceptionFilter: ExceptionFilter,
 		@inject(NAMES.AuthController) private authController: AuthController,
+		@inject(NAMES.AuthController) private config: ConfigService,
 	) {
 		this.app = express();
 		this.port = 8000;

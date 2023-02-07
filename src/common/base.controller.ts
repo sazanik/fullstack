@@ -1,16 +1,24 @@
-import { Response, Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
 
-import { IControllerRoute } from './route.interface';
-import { ILogger } from '../helpers/logger/logger.interface';
+import { HTTP_METHODS } from '@constants/index';
+import { IMiddleware } from '@helpers/index';
+import { LoggerService } from '@services/index';
+
+interface IControllerRoute {
+	path: string;
+	func: (req: Request, res: Response, next: NextFunction) => void;
+	method: keyof Pick<Router, HTTP_METHODS>;
+	middlewares?: IMiddleware[];
+}
 
 @injectable()
 export abstract class BaseController {
 	private readonly _router: Router;
-	private readonly _logger: ILogger;
+	private readonly _logger: LoggerService;
 
-	constructor(logger: ILogger) {
+	constructor(logger: LoggerService) {
 		this._router = Router();
 		this._logger = logger;
 	}
@@ -41,3 +49,5 @@ export abstract class BaseController {
 		}
 	}
 }
+
+export default BaseController;

@@ -1,15 +1,25 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 
-import { IAuthService } from './auth.service.interface';
-import { RegisterDto } from '../../dto/register.dto';
-import { UserEntity } from '../../entity/user.entity';
-import { LoginDto } from '../../dto/login.dto';
+import { LoginDto, RegisterDto } from '@DTOs/index';
+import { UserEntity } from '@entities/index';
+import { NAMES } from '@constants/index';
+import { ConfigService } from '@services/index';
+
+interface IAuthService {
+	createUser: (dto: RegisterDto) => Promise<UserEntity | null>;
+	validateUser: (dto: LoginDto) => Promise<boolean>;
+}
 
 @injectable()
-export class AuthService implements IAuthService {
+class AuthService implements IAuthService {
+	constructor(@inject(NAMES.ConfigService) private config: ConfigService) {}
+
 	async createUser({ email, password, name }: RegisterDto): Promise<UserEntity | null> {
 		const newUser = new UserEntity(email, name);
-		await newUser.setPassword(password);
+		const salt = this.config.get('SALT');
+
+		console.log(salt);
+		await newUser.setPassword(password, salt);
 
 		return null;
 	}
@@ -18,3 +28,5 @@ export class AuthService implements IAuthService {
 		return true;
 	}
 }
+
+export default AuthService;

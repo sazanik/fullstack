@@ -1,6 +1,6 @@
 import { hash } from 'bcryptjs';
 
-export class UserEntity {
+class UserEntity {
 	private _password?: string;
 	constructor(private readonly _email: string, private readonly _name: string) {}
 
@@ -16,7 +16,11 @@ export class UserEntity {
 		return this._password;
 	}
 
-	public async setPassword(password: string): Promise<void> {
-		this._password = await hash(password, 10);
+	public async setPassword(password: string, salt?: string): Promise<void> {
+		if (salt) {
+			this._password = await hash(password, Number(salt));
+		}
 	}
 }
+
+export default UserEntity;

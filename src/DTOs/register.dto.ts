@@ -1,7 +1,8 @@
-import { IAuthDto } from '../common/auth.dto.interface';
 import { IsEmail, IsString } from 'class-validator';
 
-export class RegisterDto implements IAuthDto {
+import { IAuthDto } from '@DTOs/index';
+
+class RegisterDto implements IAuthDto {
 	@IsString({ message: 'Incorrect value' })
 	name!: string;
 
@@ -11,3 +12,5 @@ export class RegisterDto implements IAuthDto {
 	@IsString({ message: 'Incorrect value' })
 	password!: string;
 }
+
+export default RegisterDto;

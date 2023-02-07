@@ -2,17 +2,17 @@ import { NextFunction, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 
-import { HttpError } from './http-error.class';
-import { ILogger } from '../helpers/logger/logger.interface';
-import { NAMES } from '../types/names';
+import { LoggerService } from '@services/index';
+import { HttpError } from '@errors/index';
+import { NAMES } from '@constants/index';
 
-export interface IExceptionFilter {
+interface IExceptionFilter {
 	catch: (err: Error, req: Request, res: Response, next: NextFunction) => void;
 }
 
 @injectable()
-export class ExceptionFilter implements IExceptionFilter {
-	constructor(@inject(NAMES.ILogger) private logger: ILogger) {}
+class ExceptionFilter implements IExceptionFilter {
+	constructor(@inject(NAMES.LoggerService) private logger: LoggerService) {}
 
 	catch(err: Error | HttpError, req: Request, res: Response, next: NextFunction): void {
 		if (err instanceof HttpError) {
@@ -25,3 +25,5 @@ export class ExceptionFilter implements IExceptionFilter {
 		next();
 	}
 }
+
+export default ExceptionFilter;
