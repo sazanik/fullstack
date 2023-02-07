@@ -9,21 +9,30 @@ import { ILogger } from '../../helpers/logger/logger.interface';
 import { IAuthController } from './auth.controller.interface';
 import { LoginDto } from '../../dto/login.dto';
 import { RegisterDto } from '../../dto/register.dto';
-import { UserEntity } from '../../entity/user.entity';
+import { AuthService } from './auth.service';
+import { HttpError } from '../../errors/http-error.class';
+import { ValidateMiddleware } from '../../helpers/validate/validate.middleware';
 
 @injectable()
 export class AuthController extends BaseController implements IAuthController {
-	constructor(@inject(NAMES.ILogger) logger: ILogger) {
+	constructor(
+		@inject(NAMES.ILogger) private logger: ILogger,
+		@inject(NAMES.AuthService) private authService: AuthService,
+	) {
 		super(logger);
 
 		this.bindRoutes([
-			{ path: '/register', method: HttpMethods.POST, func: this.register },
+			{
+				path: '/register',
+				method: HttpMethods.POST,
+				func: this.register,
+				middlewares: [new ValidateMiddleware(RegisterDto)],
+			},
 			{ path: '/login', method: HttpMethods.POST, func: this.login },
 		]);
 	}
 
 	login({ body }: Request<{}, {}, LoginDto>, res: Response, next: NextFunction): void {
-		// next(new HttpError(401, 'Non authorized', 'login'));
 		this.logger.info(body);
 		this.sendOk(res, 'OK login');
 		next();
@@ -34,11 +43,14 @@ export class AuthController extends BaseController implements IAuthController {
 		res: Response,
 		next: NextFunction,
 	): Promise<void> {
-		const newUser = new UserEntity(body.email, body.name);
-		await newUser.setPassword(body.password);
+		const newUser = await this.authService.createUser(body);
 
-		this.logger.info(body);
-		this.sendOk(res, newUser);
+		if (!newUser) {
+			return next(new HttpError(422, 'Such a user already exists'));
+		}
+
+		this.logger.info(newUser);
+		this.sendOk(res, { email: newUser.email });
 		next();
 	}
 }

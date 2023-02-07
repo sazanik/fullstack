@@ -8,9 +8,11 @@ import { ILogger } from '../helpers/logger/logger.interface';
 @injectable()
 export abstract class BaseController {
 	private readonly _router: Router;
+	private readonly _logger: ILogger;
 
-	constructor(protected logger: ILogger) {
+	constructor(logger: ILogger) {
 		this._router = Router();
+		this._logger = logger;
 	}
 
 	get router(): Router {
@@ -31,9 +33,11 @@ export abstract class BaseController {
 		for (const route of routes) {
 			const { path, func, method } = route;
 			const boundFunc = func.bind(this);
+			const middleware = route.middlewares?.map((m) => m.execute.bind(m));
+			const pipeline = middleware ? [...middleware, boundFunc] : boundFunc;
 
-			this.logger.info(`${method} ${path}`);
-			this.router[route.method](path, boundFunc);
+			this._logger.info(`${method} ${path}`);
+			this.router[route.method](path, pipeline);
 		}
 	}
 }
