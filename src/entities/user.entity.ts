@@ -1,8 +1,13 @@
 import { hash } from 'bcryptjs';
 
-class UserEntity {
-	private _password?: string;
-	constructor(private readonly _email: string, private readonly _name: string) {}
+import { IUserModel } from '@models/index';
+
+class UserEntity implements IUserModel {
+	private _password: string;
+
+	constructor(private readonly _email: string, private readonly _name: string) {
+		this._password = '';
+	}
 
 	get email(): string {
 		return this._email;
@@ -12,7 +17,7 @@ class UserEntity {
 		return this._name;
 	}
 
-	get password(): string | undefined {
+	get password(): string {
 		return this._password;
 	}
 

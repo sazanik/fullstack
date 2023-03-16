@@ -3,25 +3,29 @@ import { inject, injectable } from 'inversify';
 import { LoginDto, RegisterDto } from '@DTOs/index';
 import { UserEntity } from '@entities/index';
 import { NAMES } from '@constants/index';
-import { ConfigService } from '@services/index';
-
-interface IAuthService {
-	createUser: (dto: RegisterDto) => Promise<UserEntity | null>;
-	validateUser: (dto: LoginDto) => Promise<boolean>;
-}
+import { AuthRepository, ConfigService } from '@services/index';
+import { IAuthService, IUserModel } from '@models/index';
 
 @injectable()
 class AuthService implements IAuthService {
-	constructor(@inject(NAMES.ConfigService) private config: ConfigService) {}
+	constructor(
+		@inject(NAMES.ConfigService) private config: ConfigService,
+		@inject(NAMES.AuthRepository) private repository: AuthRepository,
+	) {}
 
-	async createUser({ email, password, name }: RegisterDto): Promise<UserEntity | null> {
+	async createUser({ email, password, name }: RegisterDto): Promise<IUserModel | null> {
 		const newUser = new UserEntity(email, name);
 		const salt = this.config.get('SALT');
 
-		console.log(salt);
 		await newUser.setPassword(password, salt);
 
-		return null;
+		const existedUser = await this.repository.find(email);
+
+		if (existedUser) {
+			return null;
+		}
+
+		return await this.repository.create(newUser);
 	}
 
 	async validateUser({ email, password }: LoginDto): Promise<boolean> {

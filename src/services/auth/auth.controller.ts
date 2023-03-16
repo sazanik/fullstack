@@ -8,11 +8,7 @@ import { HttpError } from '@errors/index';
 import { HTTP_METHODS, NAMES } from '@constants/index';
 import { LoginDto, RegisterDto } from '@DTOs/index';
 import { LoggerService, AuthService } from '@services/index';
-
-interface IAuthController {
-	login: (reg: Request, res: Response, next: NextFunction) => void;
-	register: (reg: Request, res: Response, next: NextFunction) => void;
-}
+import { IAuthController } from '@models/auth';
 
 @injectable()
 class AuthController extends BaseController implements IAuthController {
